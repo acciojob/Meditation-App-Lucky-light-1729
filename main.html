@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="app">
+  <div class="app">
     <div class="vid-container">
       <video id="bgVideo" autoplay loop muted>
         <source src="Sounds/beach.mp4" type="video/mp4" />
@@ -17,9 +17,10 @@
       <div class="sound-picker">
         <button data-sound="Sounds/beach.mp3" data-video="Sounds/beach.mp4">Beach</button>
         <button data-sound="Sounds/rain.mp3" data-video="Sounds/rain.mp4">Rain</button>
+		<audio id="meditation-audio" class="meditation-audio" src="Sounds/beach.mp3" loop></audio>
       </div>
 
-      <div id="time-select">
+      <div class="time-select">
         <button id="smaller-mins">2 min</button>
         <button id="medium-mins">5 min</button>
         <button id="long-mins">10 min</button>

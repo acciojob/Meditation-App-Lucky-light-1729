@@ -1,16 +1,14 @@
-const bgVideo = document.getElementById('bgVideo');
-const audio = new Audio('Sounds/beach.mp3');
+const audio = document.getElementById('meditation-audio');
 const playBtn = document.querySelector('.play');
 const timeDisplay = document.querySelector('.time-display');
-const timeButtons = document.querySelectorAll('#time-select button');
+const timeButtons = document.querySelectorAll('.time-select button');
 const soundButtons = document.querySelectorAll('.sound-picker button');
 
-let fakeDuration = 600; // default 10 min
+let fakeDuration = 600;
 let isPlaying = false;
+let timer;
 
-audio.loop = true;
-
-// Time buttons
+// Time selection
 timeButtons.forEach(button => {
   button.addEventListener('click', () => {
     if (button.id === 'smaller-mins') fakeDuration = 120;
@@ -20,46 +18,44 @@ timeButtons.forEach(button => {
   });
 });
 
-// Sound picker
+// Sound switching
 soundButtons.forEach(button => {
   button.addEventListener('click', () => {
     const soundSrc = button.getAttribute('data-sound');
     const videoSrc = button.getAttribute('data-video');
     audio.src = soundSrc;
-    bgVideo.src = videoSrc;
+    document.getElementById('bgVideo').src = videoSrc;
+
     if (isPlaying) {
       audio.play();
-      bgVideo.play();
+      document.getElementById('bgVideo').play();
     }
   });
 });
 
-// Play / Pause toggle
+// Play/Pause
 playBtn.addEventListener('click', () => {
   if (!isPlaying) {
     audio.play();
-    bgVideo.play();
+    document.getElementById('bgVideo').play();
     playBtn.textContent = 'Pause';
     isPlaying = true;
     startTimer();
   } else {
     audio.pause();
-    bgVideo.pause();
+    document.getElementById('bgVideo').pause();
     playBtn.textContent = 'Play';
     isPlaying = false;
     clearInterval(timer);
   }
 });
 
-// Update display
 function updateTimeDisplay(seconds) {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   timeDisplay.textContent = `${mins}:${secs}`;
 }
 
-// Countdown
-let timer;
 function startTimer() {
   let current = fakeDuration;
   updateTimeDisplay(current);
@@ -69,7 +65,7 @@ function startTimer() {
     if (current <= 0) {
       clearInterval(timer);
       audio.pause();
-      bgVideo.pause();
+      document.getElementById('bgVideo').pause();
       playBtn.textContent = 'Play';
       isPlaying = false;
     }
