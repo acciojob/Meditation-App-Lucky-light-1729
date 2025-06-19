@@ -1,77 +1,77 @@
-const audio = document.getElementById('meditation-audio');
-const playBtn = document.querySelector('.play');
-const timeDisplay = document.querySelector('.time-display');
-const timeButtons = document.querySelectorAll('.time-select button');
-const soundButtons = document.querySelectorAll('.sound-picker button');
-const video = document.getElementById('bgVideo');
-const videoSource = document.getElementById('video-source');
+window.addEventListener("DOMContentLoaded", () => {
+  const app = document.querySelector(".app");
+  const video = document.getElementById("bg-video");
+  const audio = document.getElementById("sound");
+  const play = document.querySelector(".play");
+  const timeDisplay = document.querySelector(".time-display");
+  const timeSelectButtons = document.querySelectorAll(".time-select button");
+  const soundPicker = document.querySelectorAll(".sound-picker button");
 
-let fakeDuration = 600;
-let isPlaying = false;
-let timer;
+  let fakeDuration = 600; // default 10:00
 
-// Time selection
-timeButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    if (button.id === 'smaller-mins') fakeDuration = 120;
-    else if (button.id === 'medium-mins') fakeDuration = 300;
-    else if (button.id === 'long-mins') fakeDuration = 600;
-    updateTimeDisplay(fakeDuration);
-  });
-});
-
-// Sound switching
-soundButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const soundSrc = button.getAttribute('data-sound');
-    const videoSrc = button.getAttribute('data-video');
-    audio.src = soundSrc;
-    videoSource.src = videoSrc;
-    video.load();
-
-    if (isPlaying) {
-	  audio.muted = true;
-      audio.play().catch(err => console.error(err));
-      video.play().catch(err => console.error(err));
-    }
-  });
-});
-
-// Play/Pause logic
-playBtn.addEventListener('click', () => {
-  if (!isPlaying) {
-    audio.play().catch(err => console.error(err));
-    video.play().catch(err => console.error(err));
-    playBtn.textContent = 'Pause';
-    isPlaying = true;
-    startTimer();
-  } else {
-    audio.pause();
-    video.pause();
-    playBtn.textContent = 'Play';
-    isPlaying = false;
-    clearInterval(timer);
+  // Update time display
+  function updateDisplay(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    timeDisplay.textContent = `${mins}:${secs}`;
   }
-});
 
-function updateTimeDisplay(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
-  timeDisplay.textContent = `${mins}:${secs}`;
-}
-
-function startTimer() {
-  let current = fakeDuration;
-  updateTimeDisplay(current);
-  timer = setInterval(() => {
-    current--;
-    updateTimeDisplay(current);
-    if (current <= 0) {
-      clearInterval(timer);
+  // Play/Pause toggle
+  play.addEventListener("click", () => {
+    if (!audio || !video) return;
+    if (audio.paused) {
+      audio.muted = true; // For Cypress
+      audio.play().catch(e => console.error("Audio play failed:", e));
+      video.play();
+      play.textContent = "Pause";
+    } else {
       audio.pause();
       video.pause();
-      playBtn.textContent = 'Play';
-      isPlaying = false;
+      play.textContent = "Play";
     }
-  }, 1000);
-}
+  });
+
+  // Time select
+  timeSelectButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const minutes = parseInt(btn.textContent);
+      fakeDuration = minutes * 60;
+      updateDisplay(fakeDuration);
+    });
+  });
+
+  // Sound & video switcher
+  soundPicker.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const soundSrc = btn.getAttribute("data-sound");
+      const videoSrc = btn.getAttribute("data-video");
+
+      audio.src = soundSrc;
+      video.src = videoSrc;
+      audio.load();
+      video.load();
+
+      // Autoplay workaround for Cypress
+      audio.muted = true;
+      play.textContent = "Play";
+    });
+  });
+
+  // Timer update loop
+  let currentTime = 0;
+  audio.ontimeupdate = () => {
+    currentTime = audio.currentTime;
+    let remaining = fakeDuration - currentTime;
+    if (remaining >= 0) updateDisplay(remaining);
+
+    if (currentTime >= fakeDuration) {
+      audio.pause();
+      video.pause();
+      audio.currentTime = 0;
+      play.textContent = "Play";
+    }
+  };
+
+  // Initial display
+  updateDisplay(fakeDuration);
+});

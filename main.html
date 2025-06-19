@@ -1,33 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Meditation App</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="app">
     <div class="vid-container">
-      <video class="bgVideo" autoplay loop muted>
-        <source id="video-source" src="Sounds/beach.mp4" type="video/mp4" />
-      </video>
+      <video id="bg-video" src="videos/beach.mp4" loop muted></video>
+    </div>
+
+    <div class="time-display">10:0</div>
+
+    <div class="time-select">
+      <button id="smaller-mins" class="smaller-mins">2 min</button>
+      <button id="medium-mins" class="medium-mins">5 min</button>
+      <button id="long-mins" class="long-mins">10 min</button>
+    </div>
+
+    <div class="sound-picker">
+      <button data-sound="Sounds/beach.mp3" data-video="videos/beach.mp4">Beach</button>
+      <button data-sound="Sounds/rain.mp3" data-video="videos/rain.mp4">Rain</button>
     </div>
 
     <div class="player-container">
-      <div class="sound-picker">
-        <button data-sound="Sounds/beach.mp3" data-video="Sounds/beach.mp4">Beach</button>
-        <button data-sound="Sounds/rain.mp3" data-video="Sounds/rain.mp4">Rain</button>
-      </div>
-
-      <audio id="meditation-audio" class="meditation-audio" src="Sounds/beach.mp3" loop></audio>
-
-      <div class="time-select">
-        <button class="smaller-mins">2 min</button>
-        <button class="medium-mins">5 min</button>
-        <button class="long-mins">10 min</button>
-      </div>
-
-      <div class="time-display">10:0</div>
+      <audio id="sound" src="Sounds/beach.mp3"></audio>
       <button class="play">Play</button>
     </div>
   </div>
