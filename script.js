@@ -1,73 +1,67 @@
-window.addEventListener("DOMContentLoaded", () => {
-  const app = document.querySelector(".app");
-  const video = document.querySelector("video");
-  const audio = document.querySelector("audio");
+document.addEventListener("DOMContentLoaded", () => {
+  const audio = document.getElementById("meditation-audio");
+  const video = document.getElementById("bg-video");
+  const videoSource = video.querySelector("source");
   const playButton = document.querySelector(".play");
   const timeDisplay = document.querySelector(".time-display");
   const timeButtons = document.querySelectorAll("#time-select button");
   const soundButtons = document.querySelectorAll(".sound-picker button");
 
-  let duration = 600; // default: 10 min = 600s
+  let duration = 600;
   let isPlaying = false;
   let timer;
 
-  // 🕒 Update time display
-  function updateDisplay(seconds) {
-    const min = Math.floor(seconds / 60);
-    const sec = seconds % 60;
-    timeDisplay.textContent = `${min}:${sec}`;
+  function updateDisplay() {
+    const minutes = Math.floor(duration / 60);
+    const seconds = Math.floor(duration % 60);
+    timeDisplay.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
   }
 
-  // ▶️ Play or pause audio and video
-  function togglePlay() {
-  if (!audio || !video) return;
-
-  // Get src attribute, not .src (which becomes absolute path)
-  const audioSrc = audio.getAttribute('src');
-  const videoSrc = video.querySelector('source')?.getAttribute('src') || video.getAttribute('src');
-
-  if (!audioSrc || !videoSrc) {
-    console.warn("Missing media sources.");
-    return;
-  }
-
-  if (!isPlaying) {
-    audio.play();
-    video.play();
-    playButton.textContent = "Pause";
-    startTimer();
-  } else {
-    audio.pause();
-    video.pause();
-    playButton.textContent = "Play";
-    clearInterval(timer);
-  }
-
-  isPlaying = !isPlaying;
-}
-
-  // ⏳ Countdown timer
   function startTimer() {
-    let currentTime = duration;
-    updateDisplay(currentTime);
     timer = setInterval(() => {
-      currentTime--;
-      if (currentTime < 0) {
+      if (duration <= 0) {
         clearInterval(timer);
         audio.pause();
         video.pause();
-        audio.currentTime = 0;
-        video.currentTime = 0;
         playButton.textContent = "Play";
         isPlaying = false;
-        updateDisplay(duration);
-        return;
+      } else {
+        duration--;
+        updateDisplay();
       }
-      updateDisplay(currentTime);
     }, 1000);
   }
 
-  // 🕹 Time selection
+  async function togglePlay() {
+    if (!audio || !video) return;
+
+    const audioSrc = audio.getAttribute('src');
+    const videoSrc = videoSource?.getAttribute('src') || video.getAttribute('src');
+
+    if (!audioSrc || !videoSrc) {
+      console.warn("Missing media sources.");
+      return;
+    }
+
+    if (!isPlaying) {
+      try {
+        await audio.play();
+        video.play();
+        playButton.textContent = "Pause";
+        startTimer();
+        isPlaying = true;
+      } catch (err) {
+        console.error("Playback failed", err);
+      }
+    } else {
+      audio.pause();
+      video.pause();
+      clearInterval(timer);
+      playButton.textContent = "Play";
+      isPlaying = false;
+    }
+  }
+
   timeButtons.forEach(button => {
     button.addEventListener("click", () => {
       clearInterval(timer);
@@ -82,18 +76,18 @@ window.addEventListener("DOMContentLoaded", () => {
       else if (button.id === "medium-mins") duration = 300;
       else if (button.id === "long-mins") duration = 600;
 
-      updateDisplay(duration);
+      updateDisplay();
     });
   });
 
-  // 🎵 Sound and video switching
   soundButtons.forEach(button => {
     button.addEventListener("click", () => {
       const sound = button.getAttribute("data-sound");
       const vid = button.getAttribute("data-video");
 
-      audio.src = `Sounds/${sound}`;
-      video.src = `Videos/${vid}`;
+      audio.setAttribute("src", sound);
+      videoSource.setAttribute("src", vid);
+      video.load();
 
       if (isPlaying) {
         audio.play();
@@ -102,9 +96,8 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // ▶️ Hook up play button
   playButton.addEventListener("click", togglePlay);
 
-  // Initial time
-  updateDisplay(duration);
+  // Initial update
+  updateDisplay();
 });
