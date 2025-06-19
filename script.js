@@ -15,26 +15,36 @@ window.addEventListener("DOMContentLoaded", () => {
   function updateDisplay(seconds) {
     const min = Math.floor(seconds / 60);
     const sec = seconds % 60;
-    timeDisplay.textContent = `${min}:${sec < 10 ? "0" + sec : sec}`;
+    timeDisplay.textContent = `${min}:${sec}`;
   }
 
   // ▶️ Play or pause audio and video
   function togglePlay() {
-    if (!audio.src || !video.src) return;
+  if (!audio || !video) return;
 
-    if (!isPlaying) {
-      audio.play();
-      video.play();
-      playButton.textContent = "Pause";
-      startTimer();
-    } else {
-      audio.pause();
-      video.pause();
-      playButton.textContent = "Play";
-      clearInterval(timer);
-    }
-    isPlaying = !isPlaying;
+  // Get src attribute, not .src (which becomes absolute path)
+  const audioSrc = audio.getAttribute('src');
+  const videoSrc = video.querySelector('source')?.getAttribute('src') || video.getAttribute('src');
+
+  if (!audioSrc || !videoSrc) {
+    console.warn("Missing media sources.");
+    return;
   }
+
+  if (!isPlaying) {
+    audio.play();
+    video.play();
+    playButton.textContent = "Pause";
+    startTimer();
+  } else {
+    audio.pause();
+    video.pause();
+    playButton.textContent = "Play";
+    clearInterval(timer);
+  }
+
+  isPlaying = !isPlaying;
+}
 
   // ⏳ Countdown timer
   function startTimer() {
