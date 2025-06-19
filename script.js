@@ -30,6 +30,7 @@ soundButtons.forEach(button => {
     video.load();
 
     if (isPlaying) {
+	  audio.muted = true;
       audio.play().catch(err => console.error(err));
       video.play().catch(err => console.error(err));
     }
