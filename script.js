@@ -1,77 +1,100 @@
 window.addEventListener("DOMContentLoaded", () => {
   const app = document.querySelector(".app");
-  const video = document.getElementById("bg-video");
-  const audio = document.getElementById("sound");
-  const play = document.querySelector(".play");
+  const video = document.querySelector("video");
+  const audio = document.querySelector("audio");
+  const playButton = document.querySelector(".play");
   const timeDisplay = document.querySelector(".time-display");
-  const timeSelectButtons = document.querySelectorAll(".time-select button");
-  const soundPicker = document.querySelectorAll(".sound-picker button");
+  const timeButtons = document.querySelectorAll("#time-select button");
+  const soundButtons = document.querySelectorAll(".sound-picker button");
 
-  let fakeDuration = 600; // default 10:00
+  let duration = 600; // default: 10 min = 600s
+  let isPlaying = false;
+  let timer;
 
-  // Update time display
+  // 🕒 Update time display
   function updateDisplay(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    timeDisplay.textContent = `${mins}:${secs}`;
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    timeDisplay.textContent = `${min}:${sec < 10 ? "0" + sec : sec}`;
   }
 
-  // Play/Pause toggle
-  play.addEventListener("click", () => {
-    if (!audio || !video) return;
-    if (audio.paused) {
-      audio.muted = true; // For Cypress
-      audio.play().catch(e => console.error("Audio play failed:", e));
+  // ▶️ Play or pause audio and video
+  function togglePlay() {
+    if (!audio.src || !video.src) return;
+
+    if (!isPlaying) {
+      audio.play();
       video.play();
-      play.textContent = "Pause";
+      playButton.textContent = "Pause";
+      startTimer();
     } else {
       audio.pause();
       video.pause();
-      play.textContent = "Play";
+      playButton.textContent = "Play";
+      clearInterval(timer);
     }
-  });
+    isPlaying = !isPlaying;
+  }
 
-  // Time select
-  timeSelectButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const minutes = parseInt(btn.textContent);
-      fakeDuration = minutes * 60;
-      updateDisplay(fakeDuration);
-    });
-  });
+  // ⏳ Countdown timer
+  function startTimer() {
+    let currentTime = duration;
+    updateDisplay(currentTime);
+    timer = setInterval(() => {
+      currentTime--;
+      if (currentTime < 0) {
+        clearInterval(timer);
+        audio.pause();
+        video.pause();
+        audio.currentTime = 0;
+        video.currentTime = 0;
+        playButton.textContent = "Play";
+        isPlaying = false;
+        updateDisplay(duration);
+        return;
+      }
+      updateDisplay(currentTime);
+    }, 1000);
+  }
 
-  // Sound & video switcher
-  soundPicker.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const soundSrc = btn.getAttribute("data-sound");
-      const videoSrc = btn.getAttribute("data-video");
-
-      audio.src = soundSrc;
-      video.src = videoSrc;
-      audio.load();
-      video.load();
-
-      // Autoplay workaround for Cypress
-      audio.muted = true;
-      play.textContent = "Play";
-    });
-  });
-
-  // Timer update loop
-  let currentTime = 0;
-  audio.ontimeupdate = () => {
-    currentTime = audio.currentTime;
-    let remaining = fakeDuration - currentTime;
-    if (remaining >= 0) updateDisplay(remaining);
-
-    if (currentTime >= fakeDuration) {
+  // 🕹 Time selection
+  timeButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      clearInterval(timer);
+      isPlaying = false;
+      playButton.textContent = "Play";
       audio.pause();
       video.pause();
       audio.currentTime = 0;
-      play.textContent = "Play";
-    }
-  };
+      video.currentTime = 0;
 
-  // Initial display
-  updateDisplay(fakeDuration);
+      if (button.id === "smaller-mins") duration = 120;
+      else if (button.id === "medium-mins") duration = 300;
+      else if (button.id === "long-mins") duration = 600;
+
+      updateDisplay(duration);
+    });
+  });
+
+  // 🎵 Sound and video switching
+  soundButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      const sound = button.getAttribute("data-sound");
+      const vid = button.getAttribute("data-video");
+
+      audio.src = `Sounds/${sound}`;
+      video.src = `Videos/${vid}`;
+
+      if (isPlaying) {
+        audio.play();
+        video.play();
+      }
+    });
+  });
+
+  // ▶️ Hook up play button
+  playButton.addEventListener("click", togglePlay);
+
+  // Initial time
+  updateDisplay(duration);
 });
