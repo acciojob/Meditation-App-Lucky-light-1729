@@ -1,97 +1,87 @@
 window.addEventListener("DOMContentLoaded", () => {
-  const audio = document.getElementById("meditation-audio");
-  const video = document.getElementById("bg-video");
-  const videoSource = video.querySelector("source");
+  const audio = document.getElementById("audio");
+  const video = document.getElementById("video");
   const playButton = document.querySelector(".play");
   const timeDisplay = document.querySelector(".time-display");
   const timeButtons = document.querySelectorAll("#time-select button");
   const soundButtons = document.querySelectorAll(".sound-picker button");
 
-  let duration = 600; // 10 minutes
-  let currentTime = duration;
+  let fakeDuration = 600;
   let isPlaying = false;
   let timer;
 
+  // Format time for display
   function updateDisplay() {
-    const minutes = Math.floor(currentTime / 60);
-    const seconds = currentTime % 60;
-    timeDisplay.textContent = `${minutes}:${seconds}`;
+    const minutes = Math.floor(fakeDuration / 60);
+    const seconds = Math.floor(fakeDuration % 60);
+    timeDisplay.textContent = `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
   }
 
+  // Start timer
   function startTimer() {
-    clearInterval(timer);
     timer = setInterval(() => {
-      if (currentTime <= 0) {
+      if (fakeDuration <= 0) {
         clearInterval(timer);
         audio.pause();
         video.pause();
-        isPlaying = false;
         playButton.textContent = "Play";
-        currentTime = duration;
+        isPlaying = false;
+      } else {
+        fakeDuration--;
         updateDisplay();
-        return;
       }
-      currentTime--;
-      updateDisplay();
     }, 1000);
   }
 
+  // Toggle play/pause
   function togglePlay() {
-    if (!audio || !video) return;
-
-    const audioSrc = audio.getAttribute('src');
-    const videoSrc = videoSource.getAttribute('src');
-
-    if (!audioSrc || !videoSrc) {
-      console.warn("Missing media sources.");
-      return;
-    }
-
     if (!isPlaying) {
       audio.play();
       video.play();
       playButton.textContent = "Pause";
       startTimer();
-      isPlaying = true;
     } else {
       audio.pause();
       video.pause();
-      clearInterval(timer);
       playButton.textContent = "Play";
-      isPlaying = false;
+      clearInterval(timer);
     }
+    isPlaying = !isPlaying;
   }
 
-  playButton.addEventListener("click", togglePlay);
-
+  // Change duration
   timeButtons.forEach(button => {
     button.addEventListener("click", () => {
       clearInterval(timer);
+      isPlaying = false;
+      playButton.textContent = "Play";
       audio.pause();
       video.pause();
       audio.currentTime = 0;
       video.currentTime = 0;
-      playButton.textContent = "Play";
-      isPlaying = false;
 
-      if (button.id === "smaller-mins") duration = 120;
-      else if (button.id === "medium-mins") duration = 300;
-      else if (button.id === "long-mins") duration = 600;
+      if (button.id === "smaller-mins") fakeDuration = 120;
+      else if (button.id === "medium-mins") fakeDuration = 300;
+      else if (button.id === "long-mins") fakeDuration = 600;
 
-      currentTime = duration;
       updateDisplay();
     });
   });
 
+  // Change sound and video
   soundButtons.forEach(button => {
     button.addEventListener("click", () => {
       const sound = button.getAttribute("data-sound");
       const vid = button.getAttribute("data-video");
 
-      audio.setAttribute("src", sound);
-      videoSource.setAttribute("src", vid);
-      video.load();
+      // Change audio
+      audio.src = `Sounds/${sound}`;
       audio.load();
+
+      // Change video
+      const source = video.querySelector("source");
+      source.src = `Sounds/${vid}`;
+      video.load();
 
       if (isPlaying) {
         audio.play();
@@ -100,6 +90,8 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Initial display
+  playButton.addEventListener("click", togglePlay);
+
+  // Initial time
   updateDisplay();
 });

@@ -1,34 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Meditation App</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app" id="app">
-    <div class="time-display">10:0</div>
+  <div class="app">
+    <div class="time-display">10:00</div>
 
     <div class="time-select" id="time-select">
-      <button id="smaller-mins" class="smaller-mins">2 min</button>
-      <button id="medium-mins" class="medium-mins">5 min</button>
-      <button id="long-mins" class="long-mins">10 min</button>
+      <button id="smaller-mins">2 min</button>
+      <button id="medium-mins">5 min</button>
+      <button id="long-mins">10 min</button>
     </div>
 
     <div class="sound-picker">
-      <button data-sound="Sounds/beach.mp3" data-video="Videos/beach.mp4">Beach</button>
-      <button data-sound="Sounds/rain.mp3" data-video="Videos/rain.mp4">Rain</button>
+      <button data-sound="beach.mp3" data-video="beach.mp4">Beach</button>
+      <button data-sound="rain.mp3" data-video="rain.mp4">Rain</button>
     </div>
 
     <div class="player-container">
-      <audio id="meditation-audio" src="Sounds/beach.mp3"></audio>
+      <audio id="audio">
+        <source src="Sounds/beach.mp3" type="audio/mpeg" />
+      </audio>
       <button class="play">Play</button>
     </div>
 
     <div class="vid-container">
-      <video id="bg-video" loop muted autoplay>
-        <source src="Videos/beach.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
+      <video id="video" loop muted autoplay>
+        <source src="Sounds/beach.mp4" type="video/mp4" />
       </video>
     </div>
   </div>
